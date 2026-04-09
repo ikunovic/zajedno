@@ -351,6 +351,10 @@
             Usporedba aktivna! Prikazuje se <span id="compare-count" class="font-bold">0</span> datoteka.
         </div>
         <div class="flex-1 overflow-y-auto p-2 space-y-1" id="file-list"></div>
+        <div class="p-2 border-t border-slate-300 bg-slate-100 flex gap-2">
+            <button onclick="window.mobileAddFile()" class="flex-1 flex justify-center items-center gap-1 px-2 py-2 bg-blue-600 text-white rounded text-xs font-medium shadow-sm">➕ Novi raspored</button>
+            <button onclick="window.duplicateCurrentFile(); window.toggleSidebar();" class="flex-1 flex justify-center items-center gap-1 px-2 py-2 bg-white border border-slate-300 text-slate-700 rounded text-xs font-medium">📋 Kopiraj</button>
+        </div>
     </div>
 
     <!-- Main Content -->
@@ -391,12 +395,37 @@
         <!-- Mobile Floating Menu -->
         <div class="floating-menu-container md:hidden no-print">
             <div id="floating-content" class="floating-content">
-                <div class="flex flex-col gap-4">
-                    <div><div class="text-[10px] text-slate-400 font-bold uppercase mb-2">Alati za crtanje</div><div class="grid grid-cols-2 gap-2"><button onclick="window.selectTool('father')" id="mob-btn-father" class="px-3 py-2 rounded font-medium text-sm bg-green-100 text-slate-600">Otac</button><button onclick="window.selectTool('mother')" id="mob-btn-mother" class="px-3 py-2 rounded font-medium text-sm bg-red-100 text-slate-600">Majka</button><button onclick="window.selectTool('neutral')" id="mob-btn-neutral" class="px-3 py-2 rounded font-medium text-sm bg-blue-100 text-slate-600">Drugo</button><button onclick="window.selectTool('eraser')" id="mob-btn-eraser" class="px-3 py-2 rounded font-medium text-sm bg-gray-100 text-slate-600">Briši</button></div></div>
-                    <div class="border-t border-slate-100 pt-3"><div class="grid grid-cols-2 gap-2"><button onclick="window.performUndo()" class="flex justify-center items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded text-sm"><span>↩️</span> Undo</button><button onclick="window.duplicateCurrentFile()" class="flex justify-center items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded text-sm"><span>📋</span> Kopiraj</button></div></div>
+                <div class="flex flex-col gap-3">
+                    <div>
+                        <div class="text-[10px] text-slate-400 font-bold uppercase mb-2">Alati za crtanje</div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="window.selectTool('father')" id="mob-btn-father" class="px-3 py-2 rounded font-medium text-sm bg-green-100 text-slate-600">Otac</button>
+                            <button onclick="window.selectTool('mother')" id="mob-btn-mother" class="px-3 py-2 rounded font-medium text-sm bg-red-100 text-slate-600">Majka</button>
+                            <button onclick="window.selectTool('neutral')" id="mob-btn-neutral" class="px-3 py-2 rounded font-medium text-sm bg-blue-100 text-slate-600">Drugo</button>
+                            <button onclick="window.selectTool('eraser')" id="mob-btn-eraser" class="px-3 py-2 rounded font-medium text-sm bg-gray-100 text-slate-600">Briši</button>
+                        </div>
+                    </div>
+                    <div class="border-t border-slate-100 pt-3">
+                        <div class="text-[10px] text-slate-400 font-bold uppercase mb-2">Rasporedi</div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="window.mobileAddFile()" class="flex justify-center items-center gap-1 px-3 py-2 bg-blue-50 border border-blue-200 text-blue-700 rounded text-sm font-medium">➕ Novi</button>
+                            <button onclick="window.duplicateCurrentFile(); window.toggleFloatingMenu();" class="flex justify-center items-center gap-1 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded text-sm">📋 Kopiraj</button>
+                            <button onclick="document.getElementById('import-input-mobile').click(); window.toggleFloatingMenu();" class="flex justify-center items-center gap-1 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded text-sm">📥 Uvezi</button>
+                            <button onclick="window.saveCurrentFileToDisk(); window.toggleFloatingMenu();" class="flex justify-center items-center gap-1 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded text-sm">📤 Izvezi</button>
+                        </div>
+                    </div>
+                    <div class="border-t border-slate-100 pt-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="window.performUndo(); window.toggleFloatingMenu();" class="flex justify-center items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded text-sm">↩️ Undo</button>
+                            <button onclick="window.openSidebarFromMenu()" class="flex justify-center items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded text-sm">📂 Svi fileovi</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <button onclick="window.toggleFloatingMenu()" id="fab-trigger" class="fab-button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            <button onclick="window.toggleFloatingMenu()" id="fab-trigger" class="fab-button" title="Izbornik">
+                <svg id="fab-icon-closed" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                <svg id="fab-icon-open" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
         </div>
         
         <!-- AI Chat Bubble -->
@@ -761,10 +790,32 @@
         window.toggleFloatingMenu = function() {
             const content = document.getElementById('floating-content');
             const btn = document.getElementById('fab-trigger');
-            content.classList.toggle('active'); btn.classList.toggle('open');
-            btn.innerHTML = content.classList.contains('active') 
-                ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`
-                : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="6" y1="6" x2="18" y2="18"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`;
+            const isOpening = !content.classList.contains('active');
+            content.classList.toggle('active');
+            btn.classList.toggle('open');
+            // Swap icon: pencil when closed, X when open
+            document.getElementById('fab-icon-closed').style.display = isOpening ? 'none' : '';
+            document.getElementById('fab-icon-open').style.display = isOpening ? '' : 'none';
+            // Close sidebar when menu opens to avoid overlap
+            if (isOpening) {
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar && !sidebar.classList.contains('hidden')) {
+                    sidebar.classList.add('hidden');
+                }
+            }
+        };
+
+        window.openSidebarFromMenu = function() {
+            window.toggleFloatingMenu();
+            document.getElementById('sidebar').classList.remove('hidden');
+        };
+
+        window.mobileAddFile = function() {
+            const name = prompt("Naziv novog rasporeda:", "Novi Raspored");
+            if (name && name.trim()) {
+                window.addFileToList(name.trim(), {});
+                window.toggleFloatingMenu();
+            }
         };
 
         window.toggleMobileHeader = function() { document.body.classList.toggle('header-collapsed'); };
