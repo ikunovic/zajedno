@@ -45,16 +45,11 @@
                 padding-bottom: 220px !important; 
             }
             
-            /* Sticky godina */
-            .sticky-year-header { 
-                top: 135px; /* Default height */
-                z-index: 25; 
+            /* Sticky godina — top bar is always compact on mobile */
+            .sticky-year-header {
+                top: 55px;
+                z-index: 25;
                 box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-                transition: top 0.3s ease; 
-            }
-            
-            body.header-collapsed .sticky-year-header {
-                top: 55px !important; 
             }
             
             body.paint-mode-active {
@@ -268,10 +263,6 @@
         #login-btn { background-color: #4285F4; color: white; padding: 6px 12px; border-radius: 4px; font-weight: 500; font-size: 0.8rem; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; }
         .paint-toggle { transition: all 0.2s; }
         .paint-toggle.active { background-color: #3b82f6; color: white; border-color: #3b82f6; }
-        #collapse-arrow { transition: transform 0.3s; }
-        .header-collapsed #collapse-arrow { transform: rotate(180deg); }
-        #mobile-collapsible-area { transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out; max-height: 200px; opacity: 1; overflow: hidden; }
-        body.header-collapsed #mobile-collapsible-area { max-height: 0; opacity: 0; padding: 0 !important; margin: 0 !important; }
         #current-file-name:hover { text-decoration: underline; text-decoration-style: dotted; text-decoration-color: #94a3b8; }
         #mobile-top-bar { z-index: 50; }
         button { touch-action: manipulation; }
@@ -288,8 +279,9 @@
             0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
             50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); }
         }
-        body.paint-mode-active #mobile-mode-btn {
+        body.paint-mode-active #fab-trigger {
             animation: pulse-paint 1.5s infinite;
+            background-color: #1d4ed8;
         }
 
         /* Paint indicator bar */
@@ -351,36 +343,38 @@
             Usporedba aktivna! Prikazuje se <span id="compare-count" class="font-bold">0</span> datoteka.
         </div>
         <div class="flex-1 overflow-y-auto p-2 space-y-1" id="file-list"></div>
-        <div class="p-2 border-t border-slate-300 bg-slate-100 flex gap-2">
-            <button onclick="window.mobileAddFile()" class="flex-1 flex justify-center items-center gap-1 px-2 py-2 bg-blue-600 text-white rounded text-xs font-medium shadow-sm">➕ Novi raspored</button>
-            <button onclick="window.duplicateCurrentFile(); window.toggleSidebar();" class="flex-1 flex justify-center items-center gap-1 px-2 py-2 bg-white border border-slate-300 text-slate-700 rounded text-xs font-medium">📋 Kopiraj</button>
+        <input type="file" id="import-input-mobile" class="hidden" accept=".json" onchange="window.handleFileImport(this)">
+        <div class="p-2 border-t border-slate-300 bg-slate-100 grid grid-cols-2 gap-2">
+            <button onclick="window.mobileAddFile()" class="flex justify-center items-center gap-1 px-2 py-2 bg-blue-600 text-white rounded text-xs font-medium shadow-sm col-span-2">➕ Novi raspored</button>
+            <button onclick="window.duplicateCurrentFile(); window.toggleSidebar();" class="flex justify-center items-center gap-1 px-2 py-2 bg-white border border-slate-200 text-slate-700 rounded text-xs font-medium">📋 Kopiraj</button>
+            <button onclick="window.performUndo(); window.toggleSidebar();" class="flex justify-center items-center gap-1 px-2 py-2 bg-white border border-slate-200 text-slate-700 rounded text-xs font-medium">↩️ Undo</button>
+            <button onclick="document.getElementById('import-input-mobile').click();" class="flex justify-center items-center gap-1 px-2 py-2 bg-white border border-slate-200 text-slate-700 rounded text-xs font-medium">📥 Uvezi</button>
+            <button onclick="window.saveCurrentFileToDisk(); window.toggleSidebar();" class="flex justify-center items-center gap-1 px-2 py-2 bg-slate-700 text-white rounded text-xs font-medium">📤 Izvezi</button>
+            <button onclick="window.resetCurrentFile();" class="flex justify-center items-center gap-1 px-2 py-2 bg-red-50 border border-red-200 text-red-600 rounded text-xs font-medium col-span-2">🗑️ Reset rasporeda</button>
         </div>
     </div>
 
     <!-- Main Content -->
     <div class="main-content flex-1 flex flex-col relative w-full h-full">
         <!-- Top Bar -->
-        <div id="mobile-top-bar" class="bg-white shadow-md p-2 md:p-3 border-b border-slate-200 sticky top-0 no-print transition-all">
+        <div id="mobile-top-bar" class="bg-white shadow-md p-2 md:p-3 border-b border-slate-200 sticky top-0 no-print">
             <div class="flex items-center justify-between w-full">
                 <div class="flex items-center gap-3">
                     <button onclick="window.toggleSidebar()" class="md:hidden text-slate-500 hover:bg-slate-100 p-2 rounded bg-slate-50 border border-slate-200"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
                     <div class="overflow-hidden flex items-center gap-2 cursor-pointer p-1" onclick="window.triggerRename()" title="Klikni za preimenovanje">
                         <div>
                             <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Trenutni file</div>
-                            <h1 class="text-base md:text-xl font-bold text-slate-800 truncate max-w-[150px] md:max-w-md leading-tight" id="current-file-name">Učitavanje...</h1>
+                            <h1 class="text-base md:text-xl font-bold text-slate-800 truncate max-w-[160px] md:max-w-md leading-tight" id="current-file-name">Učitavanje...</h1>
                         </div>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                     </div>
                 </div>
-                <button onclick="window.toggleMobileHeader()" class="md:hidden p-3 text-slate-500 hover:text-slate-800 bg-slate-100 rounded-full border border-slate-200 shadow-sm z-50 relative" id="collapse-btn"><svg id="collapse-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg></button>
                 <div class="hidden md:flex gap-2">
                      <button onclick="window.performUndo()" class="text-slate-600 hover:bg-slate-100 border border-slate-200 px-3 py-2 rounded text-xs uppercase flex items-center gap-1" title="Undo (Ctrl+Z)"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>Undo</button>
                      <button onclick="window.duplicateCurrentFile()" class="text-slate-600 hover:bg-slate-100 border border-slate-200 px-3 py-2 rounded text-xs uppercase flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Kopiraj</button>
                      <button onclick="window.resetCurrentFile()" class="text-red-500 hover:bg-red-50 font-bold border border-red-200 px-3 py-2 rounded text-xs uppercase">Reset</button>
                 </div>
             </div>
-            <!-- Mobile Collapsible -->
-            <div id="mobile-collapsible-area" class="md:hidden overflow-hidden"><div class="pt-3 flex flex-col gap-3"><button id="mobile-mode-btn" onclick="window.toggleMobilePaintMode()" class="paint-toggle w-full flex justify-center items-center gap-2 bg-white border border-slate-300 text-slate-600 px-3 py-2 rounded text-sm font-bold shadow-sm"><span id="mode-icon">🖐️</span> <span id="mode-text">Scroll Mode</span></button><div class="flex gap-2"><input type="file" id="import-input-mobile" class="hidden" accept=".json" onchange="window.handleFileImport(this)"><button onclick="document.getElementById('import-input-mobile').click()" class="flex-1 flex justify-center items-center gap-1 px-2 py-2 bg-white border border-slate-300 text-slate-700 rounded text-xs font-medium shadow-sm">Import</button><button onclick="window.saveCurrentFileToDisk()" class="flex-1 flex justify-center items-center gap-1 px-2 py-2 bg-slate-700 text-white rounded text-xs font-medium shadow-sm">Export</button><button onclick="window.resetCurrentFile()" class="flex-none px-3 py-2 bg-red-50 text-red-600 border border-red-200 rounded text-xs font-medium shadow-sm">Reset</button></div></div></div>
             <!-- Desktop Toolbar -->
             <div class="hidden md:flex items-center gap-2 overflow-x-auto w-full md:w-auto mt-2 md:mt-0 pt-1 border-t md:border-t-0 border-slate-100">
                 <div class="flex bg-slate-100 p-1 rounded-lg gap-1 flex-shrink-0"><button onclick="window.selectTool('father')" id="desk-btn-father" class="whitespace-nowrap px-3 py-2 rounded font-medium text-sm">Otac</button><button onclick="window.selectTool('mother')" id="desk-btn-mother" class="whitespace-nowrap px-3 py-2 rounded font-medium text-sm">Majka</button><button onclick="window.selectTool('neutral')" id="desk-btn-neutral" class="whitespace-nowrap px-3 py-2 rounded font-medium text-sm">Drugo</button><button onclick="window.selectTool('eraser')" id="desk-btn-eraser" class="whitespace-nowrap px-3 py-2 rounded font-medium text-sm">Briši</button></div>
@@ -396,8 +390,13 @@
         <div class="floating-menu-container md:hidden no-print">
             <div id="floating-content" class="floating-content">
                 <div class="flex flex-col gap-3">
+                    <!-- Mode toggle -->
+                    <button id="mobile-mode-btn" onclick="window.toggleMobilePaintMode()" class="paint-toggle w-full flex justify-center items-center gap-2 bg-white border-2 border-slate-300 text-slate-600 px-3 py-2 rounded-lg text-sm font-bold shadow-sm">
+                        <span id="mode-icon">🖐️</span><span id="mode-text">Pregledavanje</span>
+                    </button>
+                    <!-- Drawing tools (visible always so user knows what they're selecting) -->
                     <div>
-                        <div class="text-[10px] text-slate-400 font-bold uppercase mb-2">Alati za crtanje</div>
+                        <div class="text-[10px] text-slate-400 font-bold uppercase mb-2">Alat za crtanje</div>
                         <div class="grid grid-cols-2 gap-2">
                             <button onclick="window.selectTool('father')" id="mob-btn-father" class="px-3 py-2 rounded font-medium text-sm bg-green-100 text-slate-600">Otac</button>
                             <button onclick="window.selectTool('mother')" id="mob-btn-mother" class="px-3 py-2 rounded font-medium text-sm bg-red-100 text-slate-600">Majka</button>
@@ -405,24 +404,12 @@
                             <button onclick="window.selectTool('eraser')" id="mob-btn-eraser" class="px-3 py-2 rounded font-medium text-sm bg-gray-100 text-slate-600">Briši</button>
                         </div>
                     </div>
-                    <div class="border-t border-slate-100 pt-3">
-                        <div class="text-[10px] text-slate-400 font-bold uppercase mb-2">Rasporedi</div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="window.mobileAddFile()" class="flex justify-center items-center gap-1 px-3 py-2 bg-blue-50 border border-blue-200 text-blue-700 rounded text-sm font-medium">➕ Novi</button>
-                            <button onclick="window.duplicateCurrentFile(); window.toggleFloatingMenu();" class="flex justify-center items-center gap-1 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded text-sm">📋 Kopiraj</button>
-                            <button onclick="document.getElementById('import-input-mobile').click(); window.toggleFloatingMenu();" class="flex justify-center items-center gap-1 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded text-sm">📥 Uvezi</button>
-                            <button onclick="window.saveCurrentFileToDisk(); window.toggleFloatingMenu();" class="flex justify-center items-center gap-1 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded text-sm">📤 Izvezi</button>
-                        </div>
-                    </div>
-                    <div class="border-t border-slate-100 pt-3">
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="window.performUndo(); window.toggleFloatingMenu();" class="flex justify-center items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded text-sm">↩️ Undo</button>
-                            <button onclick="window.openSidebarFromMenu()" class="flex justify-center items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded text-sm">📂 Svi fileovi</button>
-                        </div>
+                    <div class="border-t border-slate-100 pt-2">
+                        <button onclick="window.performUndo(); window.toggleFloatingMenu();" class="w-full flex justify-center items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded text-sm">↩️ Undo</button>
                     </div>
                 </div>
             </div>
-            <button onclick="window.toggleFloatingMenu()" id="fab-trigger" class="fab-button" title="Izbornik">
+            <button onclick="window.toggleFloatingMenu()" id="fab-trigger" class="fab-button" title="Uređivanje">
                 <svg id="fab-icon-closed" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
                 <svg id="fab-icon-open" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
@@ -818,8 +805,6 @@
             }
         };
 
-        window.toggleMobileHeader = function() { document.body.classList.toggle('header-collapsed'); };
-
         window.toggleSidebar = function() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('hidden');
@@ -830,17 +815,21 @@
             const btn = document.getElementById('mobile-mode-btn');
             const icon = document.getElementById('mode-icon');
             const text = document.getElementById('mode-text');
-            const body = document.body;
             if(window.isMobilePaintMode) {
-                btn.classList.add('active'); btn.style.backgroundColor = '#3b82f6'; btn.style.color = 'white';
-                icon.innerText = "✏️"; text.innerText = "Crtanje";
-                body.classList.add('paint-mode-active');
+                btn.classList.add('active');
+                btn.style.backgroundColor = '#2563eb'; btn.style.color = 'white'; btn.style.borderColor = '#1d4ed8';
+                icon.innerText = "✏️"; text.innerText = "Uređivanje";
+                document.body.classList.add('paint-mode-active');
                 window.updatePaintIndicator();
-                window.showToast("Scroll zaključan - Crtaj!");
+                // Close floating menu after activating
+                const fc = document.getElementById('floating-content');
+                if (fc && fc.classList.contains('active')) window.toggleFloatingMenu();
+                window.showToast("Uređivanje aktivno — crtaj po kalendaru!");
             } else {
-                btn.classList.remove('active'); btn.style.backgroundColor = 'white'; btn.style.color = '#475569';
-                icon.innerText = "🖐️"; text.innerText = "Scroll";
-                body.classList.remove('paint-mode-active');
+                btn.classList.remove('active');
+                btn.style.backgroundColor = 'white'; btn.style.color = '#475569'; btn.style.borderColor = '#cbd5e1';
+                icon.innerText = "🖐️"; text.innerText = "Pregledavanje";
+                document.body.classList.remove('paint-mode-active');
             }
         };
 
